@@ -1,14 +1,12 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_developer_assessment/constant/route_names.dart';
 import 'package:flutter_developer_assessment/view_model/favourites_view_model.dart';
 import 'package:provider/provider.dart';
-
 import '../constant/widget_designs.dart';
+import '../service/analytics_service.dart';
 
 class FavouritesView extends StatelessWidget {
-  FirebaseAnalytics analytics;
-  FavouritesView({required this.analytics});
+  AnalyticsService analyticsService = AnalyticsService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,10 +51,12 @@ class FavouritesView extends StatelessWidget {
           child: InkWell(
               onTap: () async {
                 Navigator.of(context).pop();
-                await analytics.logEvent(name: "Navigation", parameters: {
-                  "from": FavouritesViewRoute,
-                  "to": LocationViewRoute
-                });
+                await analyticsService.getAnalytics().logEvent(
+                    name: "Navigation",
+                    parameters: {
+                      "from": FavouritesViewRoute,
+                      "to": LocationViewRoute
+                    });
               },
               child: WidgetHelper().getLoginButtonDesign(context, 40,
                   MediaQuery.of(context).size.width / 2, "Haritaya dön", 20.0)),
@@ -81,7 +81,8 @@ class FavouritesView extends StatelessWidget {
         leading: const Icon(Icons.location_on),
         trailing: GestureDetector(
             onTap: () async {
-              await analytics
+              await analyticsService
+                  .getAnalytics()
                   .logEvent(name: "PlaceRemovedFromFav", parameters: {
                 "id": Provider.of<FavouritesViewModel>(context, listen: false)
                     .favLocationsList[index]

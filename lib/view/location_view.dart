@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_developer_assessment/constant/route_names.dart';
+import 'package:flutter_developer_assessment/service/analytics_service.dart';
 import 'package:flutter_developer_assessment/view/favourites_view.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,13 +9,8 @@ import '../constant/widget_designs.dart';
 import '../model/location.dart';
 import '../view_model/location_view_model.dart';
 import 'detail_view.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 
 class LocationView extends StatefulWidget {
-  FirebaseAnalytics analytics;
-  FirebaseAnalyticsObserver observer;
-  LocationView({required this.analytics, required this.observer});
   @override
   State<LocationView> createState() => _LocationViewState();
 }
@@ -30,14 +26,15 @@ class _LocationViewState extends State<LocationView> {
   late double latitude;
   late double longitude;
   //Google map variables end
-
+  AnalyticsService analyticsService = AnalyticsService();
   FlutterSecureStorage storage = FlutterSecureStorage();
   LocationViewModel locationViewModel = LocationViewModel();
   late List<Location> locationList = [];
   String? token = "";
 
   Future<void> _sendAnalytics() async {
-    await widget.analytics
+    await analyticsService
+        .getAnalytics()
         .setCurrentScreen(screenName: LocationViewRoute)
         .onError((error, stackTrace) => null);
   }
@@ -87,13 +84,10 @@ class _LocationViewState extends State<LocationView> {
               ),
               context: context,
               builder: (BuildContext context) {
-                return DetailView(
-                    location: element,
-                    analytics: widget.analytics,
-                    observer: widget.observer);
+                return DetailView(location: element);
               },
             );
-            await widget.analytics.logEvent(
+            await analyticsService.getAnalytics().logEvent(
                 name: "LocationSelected",
                 parameters: {"id": element.id.toInt(), "name": element.name});
           },
@@ -120,12 +114,9 @@ class _LocationViewState extends State<LocationView> {
           top: 40,
           child: InkWell(
               onTap: () async {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            FavouritesView(analytics: widget.analytics)));
-                await widget.analytics.logEvent(
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => FavouritesView()));
+                await analyticsService.getAnalytics().logEvent(
                     name: "Navigation",
                     parameters: {
                       "from": LocationViewRoute,

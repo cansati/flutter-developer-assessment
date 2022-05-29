@@ -1,19 +1,16 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_developer_assessment/service/analytics_service.dart';
 import 'package:flutter_developer_assessment/view_model/favourites_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/location.dart';
 
 class DetailView extends StatelessWidget {
-  FirebaseAnalytics analytics;
-  FirebaseAnalyticsObserver observer;
   Location location;
 
-  DetailView(
-      {required this.location,
-      required this.analytics,
-      required this.observer});
+  DetailView({required this.location});
+
+  AnalyticsService analyticsService = AnalyticsService();
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +64,12 @@ class DetailView extends StatelessWidget {
                     : Icons.star_border_outlined,
                 size: 40),
             onPressed: () async {
-              await analytics.logEvent(name: "FavAddedOrRemoved", parameters: {
-                "id": location.id.toInt(),
-                "name": location.name
-              });
+              await analyticsService.getAnalytics().logEvent(
+                  name: "FavAddedOrRemoved",
+                  parameters: {
+                    "id": location.id.toInt(),
+                    "name": location.name
+                  });
               context.read<FavouritesViewModel>().addOrPopFavourite(location);
             },
           )

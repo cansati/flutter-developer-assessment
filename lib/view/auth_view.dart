@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_developer_assessment/service/analytics_service.dart';
 import 'package:flutter_developer_assessment/view/location_view.dart';
 import 'package:provider/provider.dart';
 import '../constant/widget_designs.dart';
 import '../view_model/auth_view_model.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 
 class AuthView extends StatelessWidget {
-  FirebaseAnalytics analytics;
-  FirebaseAnalyticsObserver observer;
-  AuthView({required this.analytics, required this.observer});
-
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
+  AnalyticsService analyticsService = AnalyticsService();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -25,11 +21,11 @@ class AuthView extends StatelessWidget {
                   .loginWithViewModel(username.text, password.text);
               Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => LocationView(
-                          analytics: analytics, observer: observer)),
+                  MaterialPageRoute(builder: (context) => LocationView()),
                   (route) => false);
-              await analytics.logLogin(loginMethod: "username-password");
+              await analyticsService
+                  .getAnalytics()
+                  .logLogin(loginMethod: "username-password");
             } catch (e) {
               /*ScaffoldMessenger.of(context).showSnackBar(snackBar);*/
               print(e);

@@ -4,6 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_developer_assessment/service/analytics_service.dart';
 import 'package:flutter_developer_assessment/view/auth_view.dart';
 import 'package:flutter_developer_assessment/view_model/auth_view_model.dart';
 import 'package:flutter_developer_assessment/view_model/favourites_view_model.dart';
@@ -35,17 +36,20 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
+  AnalyticsService analyticsService = AnalyticsService();
 
   Future<String> _jwtOrEmpty(BuildContext context) async {
-    var tokenOrNull = await storage.read(key: "jwt");
-    if (tokenOrNull == null) return "";
+    var tokenOrNull;
     try {
+      tokenOrNull = await storage.read(key: "jwt");
+      if (tokenOrNull == null) return "";
       await storage.write(key: "jwt", value: tokenOrNull);
       context.read<AuthViewModel>().updateToken(tokenOrNull);
+      return tokenOrNull;
     } catch (e) {
       print(e);
+      return "";
     }
-    return tokenOrNull;
   }
 
   bool _isTokenUpToDate(List jwt) {
@@ -57,6 +61,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    analyticsService.setAnalytics(analytics);
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
@@ -68,35 +73,35 @@ class MyApp extends StatelessWidget {
             future: _jwtOrEmpty(context),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return Scaffold(
-                  body: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                          height: 50,
-                          width: 50,
-                          child: const CircularProgressIndicator())
-                    ],
-                  ),
-                );
+                return loadingPage;
               }
               if (snapshot.data == "") {
-                return AuthView(analytics: analytics, observer: observer);
+                return AuthView();
               } else {
                 var str = snapshot.data.toString();
                 var jwt = str.split(".");
                 if (jwt.length == 3) {
                   if (_isTokenUpToDate(jwt)) {
-                    return LocationView(
-                        analytics: analytics, observer: observer);
+                    return LocationView();
                   } else {
-                    return AuthView(analytics: analytics, observer: observer);
+                    return AuthView();
                   }
                 } else {
-                  return AuthView(analytics: analytics, observer: observer);
+                  return AuthView();
                 }
               }
             }));
   }
+
+  Widget loadingPage = Scaffold(
+    body: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+            height: 50, width: 50, child: const CircularProgressIndicator())
+      ],
+    ),
+  );
 }
+//CS

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'package:flutter_developer_assessment/constant/application_constants.dart';
 import 'package:flutter_developer_assessment/src/generated/poi.pbgrpc.dart';
 import 'package:grpc/grpc.dart';

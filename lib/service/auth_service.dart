@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_developer_assessment/src/generated/poi.pb.dart';
 import 'package:flutter_developer_assessment/src/generated/poi.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
 import 'package:flutter_developer_assessment/constant/application_constants.dart';
